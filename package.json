@@ -2,7 +2,7 @@
   "name": "proyek-web-inter",
   "version": "1.0.0",
   "description": "",
-  "homepage": "",
+  "homepage": "https://ishidxa24.github.io/Proyek-Web-Inter/",
   "scripts": {
     "build": "webpack --config webpack.prod.js",
     "start-dev": "webpack serve --config webpack.dev.js",
