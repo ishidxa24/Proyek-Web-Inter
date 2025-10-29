@@ -1,0 +1,6 @@
+Nama: Muh Adi Kusuma Wiranta
+Profil Dicoding: https://www.dicoding.com/users/adi_kusuma_04/academies
+URL Deployment: https://adi24.netlify.app/
+
+aplikasi ini tidak menggunakan layanan map dengan api api_key
+map ditampilkan menggunakan leaflet + openStreetMap biasa
