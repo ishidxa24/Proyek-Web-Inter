@@ -1,4 +1,4 @@
-// ISI FILE: webpack.prod.js (DENGAN publicPath BARU)
+// ISI FILE: webpack.prod.js (TANPA publicPath)
 
 const common = require('./webpack.common.js');
 const { merge } = require('webpack-merge');
@@ -7,14 +7,6 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = merge(common, {
   mode: 'production',
-
-  output: {
-    // --- PERBAIKAN DI SINI ---
-    // Sesuaikan dengan nama repo baru Anda
-    publicPath: '/Proyek-Web-Inter/',
-    // -------------------------
-  },
-
   module: {
     rules: [
       {
@@ -39,7 +31,6 @@ module.exports = merge(common, {
     ],
   },
   plugins: [
-    // new CleanWebpackPlugin(), // Bisa dihapus jika output.clean: true ada di common
     new MiniCssExtractPlugin({
       filename: '[name].[contenthash].css',
     }),
