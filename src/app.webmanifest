@@ -1,8 +1,8 @@
 {
-  "name": "Story App Anda",
+  "name": "Story App Adi",
   "short_name": "StoryApp",
   "description": "Aplikasi PWA untuk berbagi cerita.",
-  "start_url": "/index.html",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#6777ef",

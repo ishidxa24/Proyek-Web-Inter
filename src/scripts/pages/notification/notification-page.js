@@ -1,17 +1,16 @@
-// ISI FILE: src/scripts/pages/notification/notification-page.js (LENGKAP)
-
-// 1. Import fungsi-fungsi dari helper
 import {
   isPushNotificationSupported,
-  requestNotificationPermission,
   subscribePushNotification,
   unsubscribePushNotification,
   getSubscriptionStatus,
 } from "../../utils/notification-helper";
+// 1. IMPORT FUNGSI UNTUK MENGAMBIL TOKEN
+import { getAccessToken } from "../../utils/auth"; 
 
 export default class NotificationPage {
   #toggleButton = null;
   #statusMessage = null;
+  #token = null; // 2. Tambahkan properti untuk menyimpan token
 
   async render() {
     return `
@@ -36,19 +35,27 @@ export default class NotificationPage {
     console.log("Halaman Notifikasi: afterRender dimulai.");
     this.#toggleButton = document.getElementById("notification-toggle");
     this.#statusMessage = document.getElementById("notification-status");
+    
+    // 3. Ambil dan simpan token saat halaman dimuat
+    this.#token = getAccessToken(); 
 
     if (!this.#toggleButton || !this.#statusMessage) {
       console.error("Elemen tombol atau status tidak ditemukan.");
       return;
+    }
+    
+    // Cek jika pengguna login
+    if (!this.#token) {
+        this.#statusMessage.textContent = "Anda harus login untuk mengatur notifikasi.";
+        this.#toggleButton.disabled = true;
+        this.#toggleButton.textContent = "Login Diperlukan";
+        return;
     }
 
     await this.#initializeToggleButton();
     this.#addFadeInEffect();
   }
 
-  /**
-   * Menginisialisasi tombol toggle: cek dukungan, status, dan tambahkan listener.
-   */
   async #initializeToggleButton() {
     if (!isPushNotificationSupported()) {
       this.#statusMessage.textContent = "Notifikasi Push tidak didukung di browser ini.";
@@ -60,7 +67,7 @@ export default class NotificationPage {
     try {
       const isSubscribed = await getSubscriptionStatus();
       this.#updateToggleButtonUI(isSubscribed);
-      this.#toggleButton.disabled = false; // Aktifkan tombol setelah status diketahui
+      this.#toggleButton.disabled = false;
       
       this.#toggleButton.addEventListener("click", this.#handleToggleClick.bind(this));
       console.log("Tombol toggle notifikasi berhasil diinisialisasi.");
@@ -72,9 +79,6 @@ export default class NotificationPage {
     }
   }
 
-  /**
-   * Menangani klik pada tombol toggle.
-   */
   async #handleToggleClick() {
     const isCurrentlySubscribed = this.#toggleButton.getAttribute("aria-pressed") === "true";
     this.#toggleButton.disabled = true;
@@ -82,17 +86,20 @@ export default class NotificationPage {
 
     try {
       if (isCurrentlySubscribed) {
-        await unsubscribePushNotification();
+        // 4. Kirim token saat unsubscribe
+        await unsubscribePushNotification(this.#token); 
         this.#updateToggleButtonUI(false);
         this.#statusMessage.textContent = "Berhasil berhenti berlangganan notifikasi.";
         console.log("Berhasil unsubscribe.");
       } else {
-        // Minta izin dulu sebelum subscribe (jika belum granted)
+        // Minta izin dulu (browser prompt)
         const permission = await Notification.requestPermission();
         if (permission !== 'granted') {
           throw new Error('Izin notifikasi tidak diberikan.');
         }
-        await subscribePushNotification();
+        
+        // 5. Kirim token saat subscribe
+        await subscribePushNotification(this.#token); 
         this.#updateToggleButtonUI(true);
         this.#statusMessage.textContent = "Berhasil berlangganan notifikasi.";
         console.log("Berhasil subscribe.");
@@ -100,17 +107,12 @@ export default class NotificationPage {
     } catch (error) {
       console.error("Aksi notifikasi gagal:", error);
       this.#statusMessage.textContent = `Gagal: ${error.message}`;
-      // Kembalikan UI ke state sebelum error (jika perlu)
       this.#updateToggleButtonUI(isCurrentlySubscribed); 
     } finally {
       this.#toggleButton.disabled = false;
     }
   }
 
-  /**
-   * Memperbarui teks dan status aria tombol toggle.
-   * @param {boolean} isSubscribed - Status langganan saat ini.
-   */
   #updateToggleButtonUI(isSubscribed) {
     if (this.#toggleButton) {
       this.#toggleButton.textContent = isSubscribed ? "Nonaktifkan Notifikasi" : "Aktifkan Notifikasi";
@@ -119,10 +121,8 @@ export default class NotificationPage {
   }
 
   #addFadeInEffect() {
-    // Fungsi ini bisa Anda pindahkan ke utils jika dipakai di banyak tempat
     const container = document.querySelector(".container");
     if (container) {
-      // Pastikan kelas 'fade-in' ada di CSS Anda
       container.classList.add("fade-in"); 
     }
   }

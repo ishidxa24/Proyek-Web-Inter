@@ -1,14 +1,17 @@
 export default class HomePresenter {
   #view = null;
   #model = null;
+  #token = null; // <-- 1. Tambahkan properti untuk token
   #currentPage = 1;
   #pageSize = 5;
   #hasMoreStories = true;
   #isLoading = false;
 
-  constructor({ view, model }) {
+  // 2. Terima 'token' di constructor
+  constructor({ view, model, token }) { 
     this.#view = view;
     this.#model = model;
+    this.#token = token; // <-- 3. Simpan token yang benar
   }
 
   async loadInitialStories() {
@@ -27,16 +30,9 @@ export default class HomePresenter {
     this.#isLoading = true;
 
     try {
-      const token = localStorage.getItem("access_token");
-
-      if (!token) {
-        this.#view.showError("Tolong login dahulu");
-        window.location.hash = "/login";
-        return;
-      }
 
       const response = await this.#model.getAllStories({
-        token,
+        token: this.#token, 
         page: this.#currentPage,
         size: this.#pageSize,
       });
@@ -49,7 +45,10 @@ export default class HomePresenter {
 
       if (stories.length < this.#pageSize) {
         this.#hasMoreStories = false;
-        this.#view.hideLoadMoreButton();
+        // Panggil fungsi 'hideLoadMoreButton' jika ada di view
+        if (this.#view.hideLoadMoreButton) {
+           this.#view.hideLoadMoreButton();
+        }
       }
 
       if (isInitial) {
@@ -60,13 +59,7 @@ export default class HomePresenter {
     } catch (error) {
       this.#view.showError(error.message);
 
-      if (
-        error.message.includes("401") ||
-        error.message.toLowerCase().includes("unauthorized")
-      ) {
-        localStorage.removeItem("access_token");
-        window.location.hash = "/login";
-      }
+      
     } finally {
       this.#isLoading = false;
     }

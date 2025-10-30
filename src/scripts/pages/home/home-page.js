@@ -1,5 +1,3 @@
-// ISI FILE: src/scripts/pages/home/home-page.js (LENGKAP DENGAN PERBAIKAN IDB)
-
 import HomePresenter from "./home-presenter";
 import * as ApiService from "../../data/api";
 // 1. IMPORT LOGIKA DATABASE

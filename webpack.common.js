@@ -1,5 +1,3 @@
-// ISI FILE: webpack.common.js (PERBAIKAN FINAL DENGAN WORKBOX)
-
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
