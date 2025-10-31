@@ -2,6 +2,8 @@ import AddStoryPresenter from "./addStory-presenter";
 import * as ApiService from "../../data/api";
 import Map from "../../utils/map";
 import "leaflet/dist/leaflet.css";
+// 1. IMPORT KEY TOKEN YANG BENAR
+import { ACCESS_TOKEN_KEY } from "../../config"; 
 
 export default class AddStory {
   #presenter = null;
@@ -11,7 +13,8 @@ export default class AddStory {
   #capturedImage = null;
 
   async render() {
-    const token = localStorage.getItem("access_token");
+    // 2. GUNAKAN KEY TOKEN YANG BENAR
+    const token = localStorage.getItem(ACCESS_TOKEN_KEY);
 
     if (!token) {
       return `
@@ -62,13 +65,20 @@ export default class AddStory {
   }
 
   async afterRender() {
-    const token = localStorage.getItem("access_token");
+    // 3. GUNAKAN KEY TOKEN YANG BENAR
+    const token = localStorage.getItem(ACCESS_TOKEN_KEY);
     if (!token) {
-      window.location.hash = "/login";
+      window.location.hash = "#/login"; // 4. GUNAKAN REDIRECT YANG BENAR
       return;
     }
 
-    this.#presenter = new AddStoryPresenter({ view: this, model: ApiService });
+    // 5. KIRIM TOKEN YANG BENAR KE PRESENTER
+    this.#presenter = new AddStoryPresenter({
+      view: this,
+      model: ApiService,
+      token: token, // <-- KIRIM TOKEN KE PRESENTER
+    });
+    
     this.#form = document.getElementById("add-story-form");
     
     this.#setupCamera();
@@ -76,8 +86,8 @@ export default class AddStory {
     this.#addFadeInEffect();
 
     this.#form.addEventListener("submit", async (event) => {
+      // ... (Logika form submit Anda sudah benar) ...
       event.preventDefault();
-
       const description = this.#form.description.value.trim();
       const imageFile = this.#form.photo.files[0] || this.#capturedImage;
       const useLocation = this.#form.useLocation.checked;
@@ -90,10 +100,8 @@ export default class AddStory {
         this.#showNotification("Ukuran foto melebihi 1MB.", "error");
         return;
       }
-
       let lat = document.getElementById("lat").value;
       let lon = document.getElementById("lon").value;
-
       if (useLocation && (!lat || !lon)) {
         try {
           const position = await Map.getCurrentPosition();
@@ -103,7 +111,6 @@ export default class AddStory {
           this.#showNotification("Gagal mendapatkan lokasi otomatis.", "error");
         }
       }
-
       const formData = new FormData();
       formData.append("description", description);
       formData.append("photo", imageFile);
@@ -111,7 +118,6 @@ export default class AddStory {
         formData.append("lat", lat);
         formData.append("lon", lon);
       }
-
       await this.#presenter.submitStory(formData);
       this.#stopCamera();
     });
@@ -120,6 +126,8 @@ export default class AddStory {
     window.addEventListener("hashchange", this.#stopCamera.bind(this));
     document.addEventListener("visibilitychange", this.#handleVisibilityChange.bind(this));
   }
+
+  // --- Sisa file Anda di bawah ini (sudah benar) ---
 
   #setupCamera() {
     const video = document.getElementById("camera-stream");
@@ -218,13 +226,12 @@ export default class AddStory {
     this.#showNotification(message, "success");
     this.#form.reset();
     
-    // --- INI PERBAIKANNYA ---
-    // Pindah halaman setelah jeda singkat untuk menghindari error.
+    // 6. GUNAKAN REDIRECT YANG BENAR
     setTimeout(() => {
       if ("startViewTransition" in document) {
-        document.startViewTransition(() => { location.hash = "/"; });
+        document.startViewTransition(() => { location.hash = "#/"; });
       } else {
-        location.hash = "/";
+        location.hash = "#/";
       }
     }, 100);
   }
@@ -248,4 +255,3 @@ export default class AddStory {
     `;
   }
 }
-

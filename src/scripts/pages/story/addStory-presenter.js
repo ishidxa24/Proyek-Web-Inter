@@ -1,21 +1,25 @@
 export default class AddStoryPresenter {
   #view;
   #model;
+  #token; // <-- 1. Tambahkan properti untuk token
 
-  constructor({ view, model }) {
+  // 2. Terima 'token' di constructor
+  constructor({ view, model, token }) { 
     this.#view = view;
     this.#model = model;
+    this.#token = token; // <-- 3. Simpan token yang benar
   }
 
   async submitStory(formData) {
     this.#view.showSubmitLoadingButton();
 
     try {
-      const token = localStorage.getItem("access_token");
-      if (!token)
-        throw new Error("Token tidak ditemukan. Silakan login ulang.");
+      // 4. HAPUS LOGIKA 'getItem("access_token")' YANG SALAH
+      // Pengecekan token sudah diurus oleh 'view' (add-story.js)
+      // if (!token) ...
 
-      const response = await this.#model.addStory(token, formData);
+      // 5. Gunakan 'this.#token' (token yang benar)
+      const response = await this.#model.addStory(this.#token, formData); 
 
       if (response.error) {
         throw new Error(response.message || "Gagal mengirim cerita.");
